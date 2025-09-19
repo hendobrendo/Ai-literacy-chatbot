@@ -1928,3 +1928,15 @@ async def chat(body: ChatIn):
         return {"message": OPENING_MESSAGE}
 
     return {"message": "I didn’t catch that. Type 'begin' to start, 'ready' after the overview, 'learn' to teach, 'next' to advance, or 'restart' to start over."}
+
+from fastapi import FastAPI
+import uvicorn
+
+app = FastAPI()
+
+@app.get("/")
+def read_root():
+    return {"message": "Chatbot backend running"}
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=10000)
