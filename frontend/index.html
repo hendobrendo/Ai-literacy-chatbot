@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>AI Literacy Course</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg: #ede7f6;            /* light purple page background */
+      --text: #181a20;
+      --muted:#52586b;
+
+      --panel-bg:#ffffff;       /* chat panel */
+      --panel-border:#b5b5b5;   /* flat silver border */
+      --panel-shadow: rgba(0,0,0,.12);
+
+      --bot:#f7f8ff;            /* bot bubble */
+      --you:#eef6ff;            /* user bubble */
+      --bubble-border:#e3e6ef;
+
+      --accent:#7c5cf0;         /* soft purple accents */
+      --accent-ink:#2a2356;
+    }
+
+    /* PAGE */
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      color:var(--text);
+      background: var(--bg);     /* no gradients */
+      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      font-size:16px; line-height:1.6;
+    }
+
+    header{
+      padding:18px 20px;
+      display:flex; align-items:center; gap:12px;
+      border-bottom: 2px solid #d9d3f6;
+      background:#f5f1ff;
+    }
+    header .title{
+      font-family:'Orbitron', system-ui;
+      font-size:24px; letter-spacing:.6px; color:var(--accent-ink);
+    }
+    header .sub{
+      margin-left:auto; color:#6a6f85; font-weight:600; font-size:12px;
+    }
+
+    #wrap{max-width:980px; margin:26px auto 40px; padding:0 16px}
+
+    /* CHAT PANEL with visible metal frame */
+    .panel{
+      position:relative;
+      background:var(--panel-bg);
+      border:4px solid var(--panel-border);       /* flat grey border */
+      border-radius:18px;
+      box-shadow: 0 10px 28px var(--panel-shadow);
+      overflow:hidden;
+    }
+    /* Metal frame around the panel (uses your diamond-plate image) */
+    .panel::before{
+      content:"";
+      position:absolute; inset:-18px; border-radius:24px;
+      background: url("silver-textured-sheet-metal-texture.jpeg") center/360px repeat;
+      z-index:-1;
+      filter: grayscale(20%) contrast(1.05);
+    }
+
+    #chat{
+      max-height:68vh; min-height:52vh;
+      overflow-y:auto;
+      padding:16px 16px 6px 16px;
+      scroll-behavior:smooth;
+      background:#fff; /* clean canvas */
+    }
+
+    .msg{
+      border:1px solid var(--bubble-border);
+      border-radius:14px;
+      padding:14px 14px;
+      margin:10px 0;
+      white-space:pre-wrap;
+      line-height:1.7;
+    }
+    .bot{ background: var(--bot); }
+    .you{ background: var(--you); }
+
+    .msg strong{ font-weight:700; }
+
+    /* INPUT BAR */
+    #bar{
+      display:flex; gap:10px;
+      padding:14px;
+      border-top: 2px solid #eff1f6;
+      background:#fafbff;
+    }
+    #input{
+      flex:1;
+      padding:18px 16px;                 /* taller input */
+      border-radius:12px;
+      border:2px solid #dfe3ee;
+      background:#ffffff;
+      color:var(--text);
+      outline:none;
+      font-size:16px;
+      font-family:'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+    #input:focus{ border-color:#c9cfee; box-shadow:0 0 0 3px #edefff; }
+
+    button{
+      padding:14px 18px;
+      border-radius:12px;
+      border:2px solid #dfe3ee;
+      background:#ffffff; color:#1f2340;
+      font-weight:700; cursor:pointer;
+    }
+    button:hover{ border-color:#c9cfee; background:#f6f7ff }
+
+    .hint{ color:#6b7189; font-size:13px; margin-top:10px }
+    .hint button{ font-size:12px }
+
+    /* Typing indicator (flat colors) */
+    .typing-wrap{ display:flex; margin:10px 0; }
+    .typing{ display:inline-flex; gap:6px; align-items:center; padding:12px 14px; border-radius:12px;
+             background:#f1f3fe; border:1px solid #e0e3f3; }
+    .dot{ width:8px; height:8px; border-radius:50%; background:#8892ff; opacity:.9; animation:bounce 1.2s infinite ease-in-out }
+    .dot:nth-child(2){ animation-delay:.15s } .dot:nth-child(3){ animation-delay:.3s }
+    @keyframes bounce{ 0%,80%,100%{transform:translateY(0);opacity:.6} 40%{transform:translateY(-4px);opacity:1} }
+
+    /* Friendly robot (original flat SVG) */
+    .robot{
+      position:fixed; right:22px; bottom:22px; width:220px; height:auto;
+      opacity:.95; pointer-events:none;
+      filter: drop-shadow(0 6px 14px rgba(0,0,0,.18));
+    }
+
+    /* Utility */
+    .pill{ display:inline-block; padding:2px 8px; border-radius:999px; background:#efeaff; color:#4b3db8; font-weight:700; font-size:12px }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="title">AI Literacy Course</span>
+    <span class="sub">Adaptive Tutor • RAG-powered</span>
+  </header>
+
+  <!-- Larger friendly robot (flat, not the exact image you sent) -->
+  <svg class="robot" viewBox="0 0 220 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <g fill="none" stroke="#2a2356" stroke-width="3">
+      <rect x="55" y="55" width="110" height="90" rx="10" fill="#bde5ff"/>
+      <circle cx="88" cy="85" r="10" fill="#ffffff"/>
+      <circle cx="132" cy="85" r="10" fill="#ffffff"/>
+      <circle cx="88" cy="85" r="4" fill="#2a2356"/>
+      <circle cx="132" cy="85" r="4" fill="#2a2356"/>
+      <rect x="85" y="108" width="50" height="12" rx="6" fill="#2a2356" stroke="none"/>
+      <rect x="72" y="150" width="76" height="22" rx="8" fill="#ffd6e7"/>
+      <path d="M55 100 C 30 120, 30 150, 55 160" />
+      <path d="M165 100 C 190 120, 190 150, 165 160" />
+      <circle cx="55" cy="160" r="8" fill="#7c5cf0" stroke="none"/>
+      <circle cx="165" cy="160" r="8" fill="#7c5cf0" stroke="none"/>
+      <line x1="110" y1="45" x2="110" y2="55" />
+      <circle cx="110" cy="42" r="6" fill="#ff6b6b" stroke="none"/>
+    </g>
+  </svg>
+
+  <div id="wrap">
+    <div class="panel">
+      <div id="chat"></div>
+      <div id="bar">
+        <input id="input" placeholder="Type here… (try: begin, ready, learn, next, restart)" />
+        <button id="send">Send</button>
+      </div>
+    </div>
+
+    <div class="hint">Shortcuts:
+      <button onclick="quick('begin')">begin</button>
+      <button onclick="quick('ready')">ready</button>
+      <button onclick="quick('learn')">learn</button>
+      <button onclick="quick('next')">next</button>
+      <button onclick="quick('restart')">restart</button>
+    </div>
+  </div>
+
+  <script>
+    const chat = document.getElementById('chat');
+    const input = document.getElementById('input');
+    const send = document.getElementById('send');
+    const sessionId = Math.random().toString(36).slice(2);
+
+    function sanitizeAndFormat(s){
+      s = (s||"");
+      s = s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+      // Strip stiff headings
+      s = s.replace(/\*\*(definition|parts?|example|quick\s*check)\*\*\s*:\s*/gi,"");
+      s = s.replace(/\b(definition|parts?|example|quick\s*check)\b\s*[-–:]\s*/gi,"");
+      // Keep simple bold
+      s = s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+      // Soft paragraphing
+      s = s.replace(/([.!?])\s+(?=[A-Z(])/g,'$1\n\n');
+      return s.replace(/\n/g,'<br>');
+    }
+
+    function add(text, who='bot'){
+      const div = document.createElement('div');
+      div.className = `msg ${who==='bot'?'bot':'you'}`;
+      div.innerHTML = sanitizeAndFormat(text);
+      chat.appendChild(div);
+      scrollToBottom();
+    }
+
+    async function post(message){
+      send.disabled = true;
+      // typing indicator
+      const tw = document.createElement('div');
+      tw.className = 'typing-wrap';
+      tw.id = 'typing';
+      tw.innerHTML = '<div class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>';
+      chat.appendChild(tw);
+      scrollToBottom();
+
+      const started = performance.now();
+      let data;
+      try{
+        const res = await fetch('http://127.0.0.1:8000/chat', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({message, session_id: sessionId})
+        });
+        data = await res.json();
+      }catch(e){
+        data = {message:'Error contacting server. Check that Uvicorn is running.'};
+      }
+      const elapsed = performance.now() - started;
+      if (elapsed < 900) await new Promise(r => setTimeout(r, 900 - elapsed));
+
+      document.getElementById('typing')?.remove();
+      add(data.message || '(no response)','bot');
+      send.disabled = false;
+    }
+
+    send.onclick = () => {
+      const m = input.value.trim();
+      if(!m) return;
+      add(m,'you');
+      input.value = '';
+      post(m);
+    };
+    input.addEventListener('keydown', e => { if(e.key==='Enter') send.click() });
+
+    function quick(word){ input.value = word; send.click() }
+
+    // Greet
+    post('');
+
+    function scrollToBottom(){
+      requestAnimationFrame(()=>{
+        chat.scrollTop = chat.scrollHeight;
+      });
+    }
+  </script>
+</body>
+</html>
