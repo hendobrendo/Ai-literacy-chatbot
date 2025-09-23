@@ -1,15 +1,42 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from pathlib import Path
 from typing import Dict, Any, List, Optional
-import re
 import os
-from dotenv import load_dotenv  # pip install python-dotenv
+import re
+from dotenv import load_dotenv
 import logging
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+
 load_dotenv()
+
+app = FastAPI()
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Point to your templates folder
+templates = Jinja2Templates(directory="templates")
+
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from fastapi.requests import Request
+
+templates = Jinja2Templates(directory="templates")
+
+@app.get("/", response_class=HTMLResponse)
+async def read_index(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+if __name__ == "__main__":
+    import uvicorn
+    import os
+    port = int(os.environ.get("PORT", 10000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
+
+# Rest of your existing code...
 
 user_state = {
     "current_step": 0,
@@ -1378,9 +1405,6 @@ def teach_response(state: Dict[str, Any], user_msg: str) -> str:
         return txt
 
 # ----------------- Routes -----------------
-@app.get("/")
-async def index():
-    return FileResponse(Path(__file__).parent / "frontend" / "index.html")
 
 @app.get("/health")
 async def health():
@@ -1934,9 +1958,4 @@ import uvicorn
 
 app = FastAPI()
 
-@app.get("/")
-def read_root():
-    return {"message": "Chatbot backend running"}
 
-if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=10000)
