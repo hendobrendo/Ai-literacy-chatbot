@@ -13,6 +13,7 @@ from fastapi.templating import Jinja2Templates
 
 load_dotenv()
 
+
 app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
