@@ -226,12 +226,14 @@
       const started = performance.now();
       let data;
       try{
-        const res = await fetch('http://127.0.0.1:8000/chat', {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({message, session_id: sessionId})
+        const response = await fetch('/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message }),
         });
-        data = await res.json();
+        data = await response.json();
       }catch(e){
         data = {message:'Error contacting server. Check that Uvicorn is running.'};
       }
@@ -241,6 +243,14 @@
       document.getElementById('typing')?.remove();
       add(data.message || '(no response)','bot');
       send.disabled = false;
+    }
+
+    function appendMessage(text, sender) {
+      const msg = document.createElement('div');
+      msg.classList.add('message', sender);
+      msg.textContent = text;
+      chat.appendChild(msg);
+      chat.scrollTop = chat.scrollHeight;
     }
 
     send.onclick = () => {
