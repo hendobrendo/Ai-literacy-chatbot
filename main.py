@@ -1,6 +1,5 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from pathlib import Path
 from typing import Dict, Any, List, Optional
@@ -13,10 +12,8 @@ from fastapi.templating import Jinja2Templates
 
 load_dotenv()
 
-
 app = FastAPI()
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Point to your templates folder
 templates = Jinja2Templates(directory="templates")
@@ -138,10 +135,6 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-# ---- Static assets (for background textures, icons, etc.) ----
-STATIC_DIR = (Path(__file__).parent / "static").resolve()
-STATIC_DIR.mkdir(parents=True, exist_ok=True)
-app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 # Back-compat route: serve the metal texture at the old root path if requested
 @app.get("/silver-textured-sheet-metal-texture.jpeg")
